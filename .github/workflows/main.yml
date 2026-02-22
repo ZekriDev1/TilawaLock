@@ -1,15 +1,15 @@
-name: Flutter iOS Build (Unsigned IPA)
+name: Build Flutter iOS IPA (No Code Signing)
 
 on:
 push:
-branches:
-- main
+branches: [ main ]
 workflow_dispatch:
 
 jobs:
 build-ios:
 runs-on: macos-latest
 
+```
 steps:
   - name: Checkout repository
     uses: actions/checkout@v4
@@ -17,16 +17,25 @@ steps:
   - name: Setup Flutter
     uses: subosito/flutter-action@v2
     with:
-      flutter-version: 3.24.0
       channel: stable
+      cache: true
 
-  - name: Flutter doctor
-    run: flutter doctor -v
+  - name: Show Flutter version
+    run: flutter --version
 
-  - name: Get dependencies
+  - name: Install dependencies
     run: flutter pub get
 
-  - name: Build iOS IPA (NO SIGNING)
+  - name: Clean project
+    run: flutter clean
+
+  - name: Install CocoaPods
+    run: |
+      cd ios
+      pod install --repo-update
+      cd ..
+
+  - name: Build unsigned IPA
     run: flutter build ipa --release --no-codesign
 
   - name: Upload IPA artifact
