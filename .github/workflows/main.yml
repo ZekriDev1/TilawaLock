@@ -7,37 +7,38 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-latest  # macOS runner required for iOS
 
     steps:
+      # 1️⃣ Checkout your repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Setup Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
+      # 3️⃣ Show Flutter version (optional)
       - name: Flutter version
         run: flutter --version
 
-      - name: Get dependencies
+      # 4️⃣ Get dependencies
+      - name: Install dependencies
         run: flutter pub get
 
+      # 5️⃣ Clean project (optional but safe)
       - name: Clean project
         run: flutter clean
 
-      - name: Install CocoaPods
-        run: |
-          cd ios
-          pod install --repo-update
-          cd ..
-
+      # 6️⃣ Build unsigned IPA
       - name: Build unsigned IPA
         run: flutter build ipa --release --no-codesign
 
-      - name: Upload IPA
+      # 7️⃣ Upload IPA as artifact
+      - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-ipa
