@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../core/services/local_database_manager.dart';
+import '../../core/services/local_database_manager.dart';
 import 'dart:io';
 
 class LocaleNotifier extends StateNotifier<Locale?> {

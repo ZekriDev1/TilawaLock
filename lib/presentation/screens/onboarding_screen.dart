@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:tilawalock/l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
 import 'permissions_screen.dart';
 

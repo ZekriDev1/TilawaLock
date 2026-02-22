@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:installed_apps/app_info.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:tilawalock/l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
 import 'usage_limit_setup_screen.dart';
 
