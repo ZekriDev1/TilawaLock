@@ -1,0 +1,58 @@
+name: Android Release Build
+
+# Trigger the workflow on push to the main branch or manual dispatch
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Android APK
+    # Run on Ubuntu as requested
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout the code from the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Java Environment (Required for Android builds)
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+
+      # 3. Set up Flutter Environment
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # 4. Install all Flutter dependencies
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 5. Generate Internationalization files
+      - name: Generate Localizations
+        run: flutter gen-l10n
+
+      # 6. Clean the project to ensure a fresh build
+      - name: Clean Project
+        run: flutter clean
+
+      # 7. Build the Release APK
+      # This generates an unsigned APK by default. 
+      # For a fully deployable APK, you would need to add signing configs.
+      - name: Build APK Release
+        run: flutter build apk --release
+
+      # 8. Upload the generated APK as a downloadable artifact
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TilawaLock-Android-Release
+          path: build/app/outputs/flutter-apk/app-release.apk

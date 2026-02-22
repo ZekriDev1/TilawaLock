@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:device_apps/device_apps.dart';
+import 'package:installed_apps/installed_apps.dart';
+import 'package:installed_apps/app_info.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
 import 'usage_limit_setup_screen.dart';
@@ -12,7 +13,7 @@ class AppSelectionScreen extends StatefulWidget {
 }
 
 class _AppSelectionScreenState extends State<AppSelectionScreen> {
-  List<Application> _apps = [];
+  List<AppInfo> _apps = [];
   final Set<String> _selectedApps = {};
   bool _isLoading = true;
 
@@ -23,13 +24,10 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
   }
 
   Future<void> _loadApps() async {
-    List<Application> apps = await DeviceApps.getInstalledApplications(
-      includeAppIcons: true,
-      includeSystemApps: false,
-      onlyAppsWithLaunchIntent: true,
-    );
+    // getInstalledApps(bool excludeSystemApps, bool withIcon)
+    List<AppInfo> apps = await InstalledApps.getInstalledApps(true, true);
     
-    apps.sort((a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
+    apps.sort((a, b) => (a.name ?? "").toLowerCase().compareTo((b.name ?? "").toLowerCase()));
 
     setState(() {
       _apps = apps;
@@ -114,15 +112,15 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (app is ApplicationWithIcon)
-                                Image.memory(app.icon, width: 48, height: 48)
+                              if (app.icon != null)
+                                Image.memory(app.icon!, width: 48, height: 48)
                               else
                                 const Icon(Icons.apps, size: 48),
                               const SizedBox(height: 8),
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                 child: Text(
-                                  app.appName,
+                                  app.name ?? "",
                                   textAlign: TextAlign.center,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
