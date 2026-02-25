@@ -66,10 +66,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>TilawaLock needs access to the microphone to match your recitation with the Qur'anic verses.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>TilawaLock uses speech recognition to verify your recitation.</string>
 </dict>
 </plist>
-

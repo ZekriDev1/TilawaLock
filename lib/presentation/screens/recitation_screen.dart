@@ -4,6 +4,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:tilawalock/l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/services/local_database_manager.dart';
+import '../../core/services/achievement_engine.dart';
 
 class RecitationScreen extends StatefulWidget {
   const RecitationScreen({super.key});
@@ -103,30 +105,38 @@ class _RecitationScreenState extends State<RecitationScreen> with SingleTickerPr
     }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog() async {
     final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(l10n.mashaAllah),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-             const Icon(Icons.check_circle, color: AppColors.gold, size: 60),
-             const SizedBox(height: 16),
-             Text(l10n.successMessage),
+    
+    // Save progress
+    int currentVerses = LocalDatabaseManager.getVersesCompleted();
+    await LocalDatabaseManager.saveVersesCompleted(currentVerses + _verses.length);
+    await AchievementEngine.addPoints(_verses.length * 10);
+
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(l10n.mashaAllah),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+               const Icon(Icons.check_circle, color: AppColors.gold, size: 60),
+               const SizedBox(height: 16),
+               Text(l10n.successMessage),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+              child: Text(l10n.finish),
+            ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
-            child: Text(l10n.finish),
-          ),
-        ],
-      ),
-    );
+      );
+    }
   }
 
   @override

@@ -40,6 +40,22 @@ class LocalDatabaseManager {
     return statsBox.get('streak', defaultValue: 0);
   }
 
+  static Future<void> saveVersesCompleted(int count) async {
+    await statsBox.put('verses_completed', count);
+  }
+
+  static int getVersesCompleted() {
+    return statsBox.get('verses_completed', defaultValue: 0);
+  }
+
+  static Future<void> savePoints(int points) async {
+    await statsBox.put('points', points);
+  }
+
+  static int getPoints() {
+    return statsBox.get('points', defaultValue: 0);
+  }
+
   // Language helpers
   static Future<void> saveLanguage(String languageCode) async {
     await settingsBox.put('language_code', languageCode);

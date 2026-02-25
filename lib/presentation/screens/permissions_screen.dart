@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:usage_stats/usage_stats.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:tilawalock/l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
@@ -45,11 +46,18 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
   }
 
   Future<void> _requestUsage() async {
-    setState(() => _isUsageGranted = true);
+    bool? isGranted = await UsageStats.checkUsagePermission();
+    if (isGranted == false) {
+      await UsageStats.grantUsagePermission();
+      // We check again after returning from settings
+      isGranted = await UsageStats.checkUsagePermission();
+    }
+    setState(() => _isUsageGranted = isGranted ?? false);
   }
 
   Future<void> _requestOverlay() async {
-    setState(() => _isOverlayGranted = true);
+    final status = await Permission.systemAlertWindow.request();
+    setState(() => _isOverlayGranted = status.isGranted);
   }
 
   bool get _allGranted => _isMicGranted && _isUsageGranted && _isNotificationGranted && _isOverlayGranted;

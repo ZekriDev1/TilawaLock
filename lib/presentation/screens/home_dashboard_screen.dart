@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:tilawalock/l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
+import '../../core/services/local_database_manager.dart';
+import '../providers/lock_provider.dart';
 import '../widgets/badge_card.dart';
 import 'settings_screen.dart';
 
-class HomeDashboardScreen extends StatelessWidget {
+class HomeDashboardScreen extends ConsumerWidget {
   const HomeDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final lockState = ref.watch(lockProvider);
+    final points = LocalDatabaseManager.getPoints();
     
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -24,9 +29,9 @@ class HomeDashboardScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDailyProgress(l10n),
+                   _buildDailyProgress(l10n, lockState, points),
                   const SizedBox(height: 24),
-                  _buildStatsGrid(l10n),
+                  _buildStatsGrid(l10n, lockState),
                   const SizedBox(height: 32),
                   Text(
                     l10n.achievements,
@@ -91,7 +96,10 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDailyProgress(AppLocalizations l10n) {
+  Widget _buildDailyProgress(AppLocalizations l10n, AppLockState state, int points) {
+    double percent = state.versesCompleted / 5.0; // Target 5
+    if (percent > 1.0) percent = 1.0;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -117,17 +125,17 @@ class HomeDashboardScreen extends StatelessWidget {
                     l10n.dailyRecitation,
                     style: TextStyle(color: AppColors.emerald.withOpacity(0.6), fontWeight: FontWeight.w600),
                   ),
-                  const Text(
-                    "4 / 5 Ayat",
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.emerald),
+                  Text(
+                    "${state.versesCompleted} / 5 Ayat",
+                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.emerald),
                   ),
                 ],
               ),
               CircularPercentIndicator(
                 radius: 40.0,
                 lineWidth: 8.0,
-                percent: 0.8,
-                center: const Text("80%", style: TextStyle(fontWeight: FontWeight.bold)),
+                percent: percent,
+                center: Text("${(percent * 100).toInt()}%", style: const TextStyle(fontWeight: FontWeight.bold)),
                 progressColor: AppColors.gold,
                 backgroundColor: AppColors.gold.withOpacity(0.1),
                 circularStrokeCap: CircularStrokeCap.round,
@@ -138,8 +146,8 @@ class HomeDashboardScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildSmallStat(l10n.streak, l10n.days(7), Icons.local_fire_department_rounded, Colors.orange),
-              _buildSmallStat(l10n.points, "1,240", Icons.stars_rounded, AppColors.gold),
+              _buildSmallStat(l10n.streak, l10n.days(state.streak), Icons.local_fire_department_rounded, Colors.orange),
+              _buildSmallStat(l10n.points, points.toString(), Icons.stars_rounded, AppColors.gold),
             ],
           ),
         ],
@@ -163,7 +171,7 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsGrid(AppLocalizations l10n) {
+  Widget _buildStatsGrid(AppLocalizations l10n, AppLockState state) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -172,8 +180,8 @@ class HomeDashboardScreen extends StatelessWidget {
       mainAxisSpacing: 16,
       childAspectRatio: 1.5,
       children: [
-        _buildStatCard(l10n.appsBlocked, "12", Icons.block_flipped, Colors.red.shade400),
-        _buildStatCard(l10n.timeSaved, "2h 15m", Icons.timer_outlined, Colors.blue.shade400),
+        _buildStatCard(l10n.appsBlocked, state.selectedApps.length.toString(), Icons.block_flipped, Colors.red.shade400),
+        _buildStatCard(l10n.timeSaved, "0h 0m", Icons.timer_outlined, Colors.blue.shade400),
       ],
     );
   }

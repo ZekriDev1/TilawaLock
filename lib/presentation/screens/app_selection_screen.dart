@@ -3,6 +3,7 @@ import 'package:installed_apps/installed_apps.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:tilawalock/l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
+import '../../core/services/local_database_manager.dart';
 import 'usage_limit_setup_screen.dart';
 
 class AppSelectionScreen extends StatefulWidget {
@@ -13,9 +14,11 @@ class AppSelectionScreen extends StatefulWidget {
 }
 
 class _AppSelectionScreenState extends State<AppSelectionScreen> {
-  List<AppInfo> _apps = [];
+  List<AppInfo> _allApps = [];
+  List<AppInfo> _filteredApps = [];
   final Set<String> _selectedApps = {};
   bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -24,14 +27,21 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
   }
 
   Future<void> _loadApps() async {
-    // getInstalledApps(bool excludeSystemApps, bool withIcon)
     List<AppInfo> apps = await InstalledApps.getInstalledApps(true, true);
-    
     apps.sort((a, b) => (a.name ?? "").toLowerCase().compareTo((b.name ?? "").toLowerCase()));
 
     setState(() {
-      _apps = apps;
+      _allApps = apps;
+      _filteredApps = apps;
       _isLoading = false;
+    });
+  }
+
+  void _filterApps(String query) {
+    setState(() {
+      _filteredApps = _allApps
+          .where((app) => (app.name ?? "").toLowerCase().contains(query.toLowerCase()))
+          .toList();
     });
   }
 
@@ -56,10 +66,13 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
         actions: [
           if (_selectedApps.isNotEmpty)
             TextButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const UsageLimitSetupScreen())
-                );
+              onPressed: () async {
+                await LocalDatabaseManager.setLockedApps(_selectedApps.toList());
+                if (mounted) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const UsageLimitSetupScreen())
+                  );
+                }
               },
               child: Text(l10n.next, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
@@ -72,6 +85,8 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: TextField(
+                    controller: _searchController,
+                    onChanged: _filterApps,
                     decoration: InputDecoration(
                       hintText: l10n.searchApps,
                       prefixIcon: const Icon(Icons.search),
@@ -93,9 +108,9 @@ class _AppSelectionScreenState extends State<AppSelectionScreen> {
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
                     ),
-                    itemCount: _apps.length,
+                    itemCount: _filteredApps.length,
                     itemBuilder: (context, index) {
-                      final app = _apps[index];
+                      final app = _filteredApps[index];
                       final isSelected = _selectedApps.contains(app.packageName);
                       
                       return GestureDetector(

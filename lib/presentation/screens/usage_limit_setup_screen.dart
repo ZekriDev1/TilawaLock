@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawalock/l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
+import '../../core/services/local_database_manager.dart';
 import 'recitation_setup_screen.dart';
 
 class UsageLimitSetupScreen extends StatefulWidget {
@@ -52,10 +53,13 @@ class _UsageLimitSetupScreenState extends State<UsageLimitSetupScreen> {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const RecitationSetupScreen())
-                  );
+                onPressed: () async {
+                  await LocalDatabaseManager.saveUsageLimit(_selectedMinutes);
+                  if (mounted) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const RecitationSetupScreen())
+                    );
+                  }
                 },
                 child: Text(l10n.next),
               ),

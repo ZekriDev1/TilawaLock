@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter/services.dart';
 import 'package:tilawalock/l10n/app_localizations.dart';
 import '../../core/constants/colors.dart';
 import 'recitation_screen.dart';
@@ -96,7 +97,7 @@ class LockOverlayScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () {
-                      // Minimize app or go home
+                      SystemNavigator.pop();
                     },
                     child: Text(
                       l10n.closeAndDiscipline,

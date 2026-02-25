@@ -33,10 +33,22 @@ class UsageTrackingService {
   void _checkIfAppShouldBeLocked(String packageName) {
     List<String> lockedApps = LocalDatabaseManager.getLockedApps();
     if (lockedApps.contains(packageName)) {
-      // Check if usage limit exceeded
-      // This part would involve tracking daily time per app
-      // For this prototype, we'll signal a lock if it's a locked app
-      print("Locked app detected: $packageName");
+      int limitMinutes = LocalDatabaseManager.getUsageLimit();
+      
+      // Get today's usage for this app
+      String todayKey = "usage_${DateTime.now().year}_${DateTime.now().month}_${DateTime.now().day}";
+      Map usageData = LocalDatabaseManager.statsBox.get(todayKey, defaultValue: {});
+      int currentMinutes = usageData[packageName] ?? 0;
+      
+      // Update usage (adding 2 seconds as per timer interval)
+      currentMinutes += 2; // This is actually seconds, let's track in seconds for precision
+      usageData[packageName] = currentMinutes;
+      LocalDatabaseManager.statsBox.put(todayKey, usageData);
+
+      if (currentMinutes >= (limitMinutes * 60)) {
+        print("Usage limit exceeded for: $packageName. Signaling lock UI.");
+        // In a real app, this would trigger the overlay
+      }
     }
   }
 }

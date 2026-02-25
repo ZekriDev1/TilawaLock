@@ -34,7 +34,6 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // Background Glow
           Center(
             child: FadeIn(
               duration: const Duration(seconds: 2),

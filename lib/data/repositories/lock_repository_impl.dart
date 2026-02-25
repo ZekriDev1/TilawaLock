@@ -20,7 +20,11 @@ class LockRepositoryImpl implements LockRepository {
 
   @override
   Future<void> unlockApp(String packageName) async {
-     // Usually means removing from lock list or temporary unlock
+    final list = LocalDatabaseManager.getLockedApps();
+    if (list.contains(packageName)) {
+      list.remove(packageName);
+      await LocalDatabaseManager.setLockedApps(list);
+    }
   }
 
   @override
